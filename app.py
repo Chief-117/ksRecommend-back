@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 # ✅ 使用「上一層」的 crawler 資料夾
-json_path = os.path.join(os.path.dirname(__file__), "..", "crawler", "kaohsiung_restaurants_detailed.json")
+json_path = os.path.join(os.path.dirname(__file__),  "crawler", "kaohsiung_restaurants_detailed.json")
 json_path = os.path.abspath(json_path)
 
 if not os.path.exists(json_path):
