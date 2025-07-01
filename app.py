@@ -1,13 +1,13 @@
 import os
 import json
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS  # 🔥 新增這行
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # 🔥 啟用 CORS
 
 # ✅ 使用「上一層」的 crawler 資料夾
-json_path = os.path.join(os.path.dirname(__file__),  "crawler", "kaohsiung_restaurants_detailed.json")
+json_path = os.path.join(os.path.dirname(__file__), "crawler", "kaohsiung_restaurants_detailed.json")
 json_path = os.path.abspath(json_path)
 
 if not os.path.exists(json_path):
