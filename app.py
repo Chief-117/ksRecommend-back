@@ -70,7 +70,9 @@ def get_restaurants():
     def is_price_in_range(restaurant_min, restaurant_max, min_price, max_price):
         if restaurant_min is None or restaurant_max is None:
             return False  # 無有效價格資料，排除
-        # 檢查價格範圍是否有交集
+        # 檢查價格範圍是否完全在指定範圍內或有交集
+        if min_price == 2000 and max_price == float("inf"):  # 處理 "2000+" 情況
+            return restaurant_min >= 2000
         return restaurant_min <= max_price and restaurant_max >= min_price
 
     # ➤ 篩選資料
