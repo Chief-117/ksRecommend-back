@@ -26,11 +26,19 @@ def get_restaurants():
     if not district:
         return jsonify([])
 
+    # ➤ 將文字價格轉成 min/max
     def extract_price_bounds(price_str):
         if not price_str or "未提供" in price_str or "暫無" in price_str:
             return None, None
+
         if "超過" in price_str or "以上" in price_str or "起" in price_str:
-            return 2000, None  # 無上限視為 None
+            nums = re.findall(r"\d+", price_str.replace(",", ""))
+            if nums:
+                base = int(nums[0])
+                return base, None  # 無上限
+            else:
+                return None, None
+
         s = price_str.lower().strip()
         s = s.replace("~", "-").replace("－", "-").replace(",", "")
         s = re.sub(r"[^\d\-]", "", s)
@@ -76,16 +84,12 @@ def get_restaurants():
                     continue
 
             elif price_range == "2000up":
-                # 三種情況符合 2000up：
-                # 1. min >= 2000
-                # 2. min <= 2000 且 max > 2000（跨過門檻）
-                # 3. 無上限（max 是 None）
                 if price_min is None:
                     continue
                 if not (
                     (price_min >= 2000) or
                     (price_max is not None and price_min <= 2000 and price_max > 2000) or
-                    (price_max is None)
+                    (price_max is None and price_min > 2000)  # 🔥 重點：1800 不行，2001 可以
                 ):
                     continue
 
