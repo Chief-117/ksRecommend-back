@@ -48,7 +48,7 @@ def get_restaurants():
             if len(nums) == 1:
                 return nums[0]
             elif len(nums) >= 2:
-                return sum(nums) // len(nums)
+                return sum(nums) // len(nums)  # 平均值
         except:
             return None
         return None
