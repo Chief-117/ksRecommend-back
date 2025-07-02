@@ -26,51 +26,23 @@ def get_restaurants():
     if not district:
         return jsonify([])
 
-    # ➤ 解析價格範圍參數
-    min_price, max_price = None, None
-    if price_range == "2000up":
-        min_price = 2000
-        max_price = float("inf")
-    elif "-" in price_range:
-        try:
-            parts = price_range.split("-")
-            min_price = int(parts[0])
-            max_price = int(parts[1]) if parts[1].strip() and parts[1] != "inf" else float("inf")
-        except (ValueError, IndexError):
-            min_price, max_price = None, None
-
-    # ➤ 將價格字串轉成 min / max
-    def parse_price_string(price_str):
-        try:
-            s = price_str.lower().strip()
-            is_over = "超過" in s or "以上" in s
-            s = s.replace("元", "").replace("約", "").replace("以上", "").replace("超過", "")
-            s = s.replace("~", "-").replace("－", "-").replace(",", "")
-            s = re.sub(r"[^0-9\-]", "", s)
-
-            if not s or s in ["$", "$$", "$$$"]:  # 處理無效價格格式
-                return None, None
-
-            if "-" in s:
-                nums = [int(x) for x in s.split("-") if x.isdigit()]
-                if len(nums) == 2:
-                    return (nums[0], float("inf")) if is_over else (nums[0], nums[1])
-            elif s.isdigit():
-                val = int(s)
-                return (val, float("inf")) if is_over else (val, val)
-        except (ValueError, IndexError):
+    def extract_price_bounds(price_str):
+        if not price_str or "未提供" in price_str or "暫無" in price_str:
             return None, None
+        if "超過" in price_str or "以上" in price_str or "起" in price_str:
+            return 2000, None  # 無上限視為 None
+        s = price_str.lower().strip()
+        s = s.replace("~", "-").replace("－", "-").replace(",", "")
+        s = re.sub(r"[^\d\-]", "", s)
+        if "-" in s:
+            nums = [int(x) for x in s.split("-") if x.isdigit()]
+            if len(nums) == 2:
+                return nums[0], nums[1]
+        elif s.isdigit():
+            val = int(s)
+            return val, val
         return None, None
 
-    # ➤ 比對是否符合篩選條件
-    def is_price_in_range(restaurant_min, restaurant_max, filter_min, filter_max):
-        if restaurant_min is None or restaurant_max is None:
-            return False
-        if filter_max == float("inf"):
-            return restaurant_max >= filter_min  # 檢查餐廳價格範圍的上限是否 >= 2000
-        return restaurant_max >= filter_min and restaurant_min <= filter_max
-
-    # ➤ 開始篩選資料
     results = []
     for r in data:
         if r.get("district", "").strip() != district:
@@ -81,24 +53,41 @@ def get_restaurants():
             if food_type not in r_types:
                 continue
 
-        # ➤ 價格篩選
-        if min_price is not None and max_price is not None:
-            price_str = r.get("price_range", "").strip()
-            if not price_str or "未提供" in price_str or "暫無" in price_str:
-                continue
-            r_min, r_max = parse_price_string(price_str)
+        price_str = r.get("price_range", "").strip()
+        price_min, price_max = extract_price_bounds(price_str)
 
-            if r_min is None or r_max is None:
-                print(f"[DEBUG] ❌ {r.get('name')} ➜ 無法解析價格: {price_str}")
-                continue
+        if price_range:
+            if price_range == "0-500":
+                if price_min is None or price_max is None:
+                    continue
+                if not (price_min >= 0 and price_max <= 500):
+                    continue
 
-            print(f"[DEBUG] {r.get('name')} | 原始: {price_str} ➜ min={r_min}, max={r_max} | 篩選: min={min_price}~max={max_price}")
+            elif price_range == "500-1000":
+                if price_min is None or price_max is None:
+                    continue
+                if not (price_min >= 500 and price_max <= 1000):
+                    continue
 
-            if not is_price_in_range(r_min, r_max, min_price, max_price):
-                print("      ⛔ 被排除")
-                continue
-            else:
-                print("      ✅ 通過")
+            elif price_range == "1000-2000":
+                if price_min is None or price_max is None:
+                    continue
+                if not (price_min >= 1000 and price_max <= 2000):
+                    continue
+
+            elif price_range == "2000up":
+                # 三種情況符合 2000up：
+                # 1. min >= 2000
+                # 2. min <= 2000 且 max > 2000（跨過門檻）
+                # 3. 無上限（max 是 None）
+                if price_min is None:
+                    continue
+                if not (
+                    (price_min >= 2000) or
+                    (price_max is not None and price_min <= 2000 and price_max > 2000) or
+                    (price_max is None)
+                ):
+                    continue
 
         results.append(r)
 
