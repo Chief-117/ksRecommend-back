@@ -4,9 +4,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # 啟用 CORS 讓前端可存取
+CORS(app)  # 允許跨域存取
 
-# ✅ 指向 JSON 資料位置
+# 載入資料
 json_path = os.path.join(os.path.dirname(__file__), "crawler", "kaohsiung_restaurants_detailed.json")
 json_path = os.path.abspath(json_path)
 
@@ -20,12 +20,12 @@ with open(json_path, "r", encoding="utf-8") as f:
 def get_restaurants():
     district = request.args.get("district", "").strip()
     food_type = request.args.get("type", "").strip()
-    price_range = request.args.get("price", "").strip()  # ⬅️ 接收價格參數（如 0-500）
+    price_range = request.args.get("price", "").strip()
 
     if not district:
         return jsonify([])
 
-    # 👉 解析價格區間
+    # ➤ 解析前端傳來的價格範圍
     min_price = None
     max_price = None
     if price_range:
@@ -38,9 +38,9 @@ def get_restaurants():
                 min_price = int(parts[0])
                 max_price = int(parts[1])
             except:
-                pass  # 解析失敗就略過價格比對
+                pass  # 無效格式就略過價格篩選
 
-    # 👉 將 price_range 字串轉成可比對的平均價格
+    # ➤ 將價格字串轉為數字以便比對
     def parse_price_string(price_str):
         try:
             s = price_str.replace("元", "").replace("約", "").replace("以上", "").replace("~", "-").replace("－", "-")
@@ -48,11 +48,12 @@ def get_restaurants():
             if len(nums) == 1:
                 return nums[0]
             elif len(nums) >= 2:
-                return sum(nums) // len(nums)  # 取平均值
+                return sum(nums) // len(nums)
         except:
             return None
         return None
 
+    # ➤ 篩選資料
     results = []
     for r in data:
         if r.get("district", "").strip() != district:
@@ -60,9 +61,11 @@ def get_restaurants():
         if food_type != "all" and food_type not in r.get("type", "").strip():
             continue
 
-        # 價格篩選邏輯
         if min_price is not None and max_price is not None:
-            price_str = r.get("price_range", "")
+            price_str = r.get("price_range", "").strip()
+            if not price_str or "未提供" in price_str or "暫無" in price_str:
+                continue  # ➤ 排除價格無效資料
+
             avg_price = parse_price_string(price_str)
             if avg_price is None or not (min_price <= avg_price <= max_price):
                 continue
