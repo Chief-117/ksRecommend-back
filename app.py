@@ -36,22 +36,42 @@ def get_restaurants():
             try:
                 parts = price_range.split("-")
                 min_price = int(parts[0])
-                max_price = int(parts[1])
+                max_price = int(parts[1]) if parts[1].strip() else float("inf")
             except:
                 pass  # 無效格式就略過價格篩選
 
-    # ➤ 將價格字串轉為數字以便比對
+    # ➤ 將價格字串轉為最小與最大值
     def parse_price_string(price_str):
         try:
-            s = price_str.replace("元", "").replace("約", "").replace("以上", "").replace("~", "-").replace("－", "-")
-            nums = [int(x) for x in s.split("-") if x.strip().isdigit()]
-            if len(nums) == 1:
-                return nums[0]
-            elif len(nums) >= 2:
-                return sum(nums) // len(nums)  # 平均值
+            # 清理價格字串
+            s = price_str.replace("元", "").replace("約", "").replace("以上", "").replace("~", "-").replace("－", "-").strip()
+            if not s or s.startswith("$") and len(s) <= 1:  # 處理空字串或僅有"$"的情況
+                return None, None
+            if s.startswith("$"):  # 移除開頭的"$"符號
+                s = s[1:]
+            if "-" in s:
+                nums = [int(x) for x in s.split("-") if x.strip().isdigit()]
+                if len(nums) >= 2:
+                    return nums[0], nums[1]  # 返回最小與最大值
+                elif len(nums) == 1:
+                    return nums[0], nums[0]  # 單一價格視為最小與最大值相同
+            elif s.isdigit():
+                num = int(s)
+                return num, num  # 單一價格視為最小與最大值相同
+            elif s == "$$":  # 假設 "$$" 對應 400-800
+                return 400, 800
+            elif s == "$$$":  # 假設 "$$$" 對應 800-1200
+                return 800, 1200
         except:
-            return None
-        return None
+            return None, None
+        return None, None
+
+    # ➤ 檢查價格範圍是否重疊
+    def is_price_in_range(restaurant_min, restaurant_max, min_price, max_price):
+        if restaurant_min is None or restaurant_max is None:
+            return False  # 無有效價格資料，排除
+        # 檢查價格範圍是否有交集
+        return restaurant_min <= max_price and restaurant_max >= min_price
 
     # ➤ 篩選資料
     results = []
@@ -63,11 +83,8 @@ def get_restaurants():
 
         if min_price is not None and max_price is not None:
             price_str = r.get("price_range", "").strip()
-            if not price_str or "未提供" in price_str or "暫無" in price_str:
-                continue  # ➤ 排除價格無效資料
-
-            avg_price = parse_price_string(price_str)
-            if avg_price is None or not (min_price <= avg_price <= max_price):
+            restaurant_min, restaurant_max = parse_price_string(price_str)
+            if not is_price_in_range(restaurant_min, restaurant_max, min_price, max_price):
                 continue
 
         results.append(r)
