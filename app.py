@@ -1,11 +1,11 @@
 import os
 import json
 import re
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # 允許跨域存取
+CORS(app)
 
 # 載入資料
 json_path = os.path.join(os.path.dirname(__file__), "crawler", "kaohsiung_restaurants_detailed.json")
@@ -28,61 +28,54 @@ def get_restaurants():
 
     # ➤ 解析價格範圍參數
     min_price, max_price = None, None
-    if price_range == "2000+":
+    if price_range == "2000up":
         min_price = 2000
         max_price = float("inf")
     elif "-" in price_range:
         try:
             parts = price_range.split("-")
             min_price = int(parts[0])
-            max_price = int(parts[1]) if parts[1].strip() else float("inf")
-        except:
-            pass
+            max_price = int(parts[1]) if parts[1].strip() and parts[1] != "inf" else float("inf")
+        except (ValueError, IndexError):
+            min_price, max_price = None, None
 
-    # ➤ 將 price_range 字串轉成最小與最大價格
+    # ➤ 將價格字串轉成 min / max
     def parse_price_string(price_str):
         try:
-            s = price_str.strip().replace("元", "").replace("約", "").replace("以上", "").replace("~", "-").replace("－", "-").replace(",", "")
-            s = re.sub(r"[^\d\-]", "", s)  # 只保留數字與減號
+            s = price_str.lower().strip()
+            is_over = "超過" in s or "以上" in s
+            s = s.replace("元", "").replace("約", "").replace("以上", "").replace("超過", "")
+            s = s.replace("~", "-").replace("－", "-").replace(",", "")
+            s = re.sub(r"[^0-9\-]", "", s)
 
-            if not s:
+            if not s or s in ["$", "$$", "$$$"]:  # 處理無效價格格式
                 return None, None
 
-            if s in ["$", "＄"]:
-                return 0, 200
-            elif s == "$$":
-                return 200, 600
-            elif s == "$$$":
-                return 600, 1200
-
-            nums = [int(x) for x in s.split("-") if x.isdigit()]
-            if len(nums) == 1:
-                return nums[0], nums[0]
-            elif len(nums) >= 2:
-                return min(nums), max(nums)
-        except:
+            if "-" in s:
+                nums = [int(x) for x in s.split("-") if x.isdigit()]
+                if len(nums) == 2:
+                    return (nums[0], float("inf")) if is_over else (nums[0], nums[1])
+            elif s.isdigit():
+                val = int(s)
+                return (val, float("inf")) if is_over else (val, val)
+        except (ValueError, IndexError):
             return None, None
         return None, None
 
-    # ➤ 價格區間比對邏輯（交集 or 嚴格下限比對）
+    # ➤ 比對是否符合篩選條件
     def is_price_in_range(restaurant_min, restaurant_max, filter_min, filter_max):
         if restaurant_min is None or restaurant_max is None:
             return False
-
         if filter_max == float("inf"):
-            # 僅納入價格範圍都 ≥ 2000 的資料
-            return restaurant_min >= filter_min and restaurant_max >= filter_min
-        else:
-            # 一般區間：有交集即可
-            return restaurant_max >= filter_min and restaurant_min <= filter_max
+            return restaurant_max >= filter_min  # 檢查餐廳價格範圍的上限是否 >= 2000
+        return restaurant_max >= filter_min and restaurant_min <= filter_max
 
-    # ➤ 篩選資料
+    # ➤ 開始篩選資料
     results = []
     for r in data:
         if r.get("district", "").strip() != district:
             continue
 
-        # ➤ 多分類菜系支援（"中式,熱炒" 類型）
         if food_type != "all":
             r_types = r.get("type", "").replace("、", ",").replace(" ", "").split(",")
             if food_type not in r_types:
@@ -94,12 +87,26 @@ def get_restaurants():
             if not price_str or "未提供" in price_str or "暫無" in price_str:
                 continue
             r_min, r_max = parse_price_string(price_str)
-            if not is_price_in_range(r_min, r_max, min_price, max_price):
+
+            if r_min is None or r_max is None:
+                print(f"[DEBUG] ❌ {r.get('name')} ➜ 無法解析價格: {price_str}")
                 continue
+
+            print(f"[DEBUG] {r.get('name')} | 原始: {price_str} ➜ min={r_min}, max={r_max} | 篩選: min={min_price}~max={max_price}")
+
+            if not is_price_in_range(r_min, r_max, min_price, max_price):
+                print("      ⛔ 被排除")
+                continue
+            else:
+                print("      ✅ 通過")
 
         results.append(r)
 
-    return jsonify(results)
+    response = make_response(jsonify(results))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True)
