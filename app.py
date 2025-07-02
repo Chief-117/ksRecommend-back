@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -42,34 +43,37 @@ def get_restaurants():
     def parse_price_string(price_str):
         try:
             s = price_str.strip().replace("元", "").replace("約", "").replace("以上", "").replace("~", "-").replace("－", "-").replace(",", "")
+            s = re.sub(r"[^\d\-]", "", s)  # 只保留數字與減號
+
             if not s:
                 return None, None
+
             if s in ["$", "＄"]:
                 return 0, 200
             elif s == "$$":
                 return 200, 600
             elif s == "$$$":
                 return 600, 1200
-            if s.startswith("$"):
-                s = s[1:]
-            nums = [int(x) for x in s.split("-") if x.strip().isdigit()]
+
+            nums = [int(x) for x in s.split("-") if x.isdigit()]
             if len(nums) == 1:
                 return nums[0], nums[0]
             elif len(nums) >= 2:
-                return nums[0], nums[1]
+                return min(nums), max(nums)
         except:
             return None, None
         return None, None
 
-    # ➤ 價格區間比對邏輯（交集 or 下限比對）
+    # ➤ 價格區間比對邏輯（交集 or 嚴格下限比對）
     def is_price_in_range(restaurant_min, restaurant_max, filter_min, filter_max):
         if restaurant_min is None or restaurant_max is None:
             return False
+
         if filter_max == float("inf"):
-            # 2000+：最低價格必須 ≥ 2000
-            return restaurant_min >= filter_min
+            # 僅納入價格範圍都 ≥ 2000 的資料
+            return restaurant_min >= filter_min and restaurant_max >= filter_min
         else:
-            # 一般區間：只要有交集即可
+            # 一般區間：有交集即可
             return restaurant_max >= filter_min and restaurant_min <= filter_max
 
     # ➤ 篩選資料
