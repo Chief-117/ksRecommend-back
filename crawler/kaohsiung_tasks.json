@@ -1,0 +1,310 @@
+[
+  {
+    "district": "苓雅區",
+    "type": "中式"
+  },
+  {
+    "district": "苓雅區",
+    "type": "日式"
+  },
+  {
+    "district": "苓雅區",
+    "type": "韓式"
+  },
+  {
+    "district": "苓雅區",
+    "type": "美式"
+  },
+  {
+    "district": "苓雅區",
+    "type": "義式"
+  },
+  {
+    "district": "苓雅區",
+    "type": "泰式"
+  },
+  {
+    "district": "苓雅區",
+    "type": "甜點"
+  },
+  {
+    "district": "鹽埕區",
+    "type": "中式"
+  },
+  {
+    "district": "鹽埕區",
+    "type": "日式"
+  },
+  {
+    "district": "鹽埕區",
+    "type": "韓式"
+  },
+  {
+    "district": "鹽埕區",
+    "type": "美式"
+  },
+  {
+    "district": "鹽埕區",
+    "type": "義式"
+  },
+  {
+    "district": "鹽埕區",
+    "type": "泰式"
+  },
+  {
+    "district": "鹽埕區",
+    "type": "甜點"
+  },
+  {
+    "district": "前金區",
+    "type": "中式"
+  },
+  {
+    "district": "前金區",
+    "type": "日式"
+  },
+  {
+    "district": "前金區",
+    "type": "韓式"
+  },
+  {
+    "district": "前金區",
+    "type": "美式"
+  },
+  {
+    "district": "前金區",
+    "type": "義式"
+  },
+  {
+    "district": "前金區",
+    "type": "泰式"
+  },
+  {
+    "district": "前金區",
+    "type": "甜點"
+  },
+  {
+    "district": "新興區",
+    "type": "中式"
+  },
+  {
+    "district": "新興區",
+    "type": "日式"
+  },
+  {
+    "district": "新興區",
+    "type": "韓式"
+  },
+  {
+    "district": "新興區",
+    "type": "美式"
+  },
+  {
+    "district": "新興區",
+    "type": "義式"
+  },
+  {
+    "district": "新興區",
+    "type": "泰式"
+  },
+  {
+    "district": "新興區",
+    "type": "甜點"
+  },
+  {
+    "district": "左營區",
+    "type": "中式"
+  },
+  {
+    "district": "左營區",
+    "type": "日式"
+  },
+  {
+    "district": "左營區",
+    "type": "韓式"
+  },
+  {
+    "district": "左營區",
+    "type": "美式"
+  },
+  {
+    "district": "左營區",
+    "type": "義式"
+  },
+  {
+    "district": "左營區",
+    "type": "泰式"
+  },
+  {
+    "district": "左營區",
+    "type": "甜點"
+  },
+  {
+    "district": "三民區",
+    "type": "中式"
+  },
+  {
+    "district": "三民區",
+    "type": "日式"
+  },
+  {
+    "district": "三民區",
+    "type": "韓式"
+  },
+  {
+    "district": "三民區",
+    "type": "美式"
+  },
+  {
+    "district": "三民區",
+    "type": "義式"
+  },
+  {
+    "district": "三民區",
+    "type": "泰式"
+  },
+  {
+    "district": "三民區",
+    "type": "甜點"
+  },
+  {
+    "district": "鼓山區",
+    "type": "中式"
+  },
+  {
+    "district": "鼓山區",
+    "type": "日式"
+  },
+  {
+    "district": "鼓山區",
+    "type": "韓式"
+  },
+  {
+    "district": "鼓山區",
+    "type": "美式"
+  },
+  {
+    "district": "鼓山區",
+    "type": "義式"
+  },
+  {
+    "district": "鼓山區",
+    "type": "泰式"
+  },
+  {
+    "district": "鼓山區",
+    "type": "甜點"
+  },
+  {
+    "district": "楠梓區",
+    "type": "中式"
+  },
+  {
+    "district": "楠梓區",
+    "type": "日式"
+  },
+  {
+    "district": "楠梓區",
+    "type": "韓式"
+  },
+  {
+    "district": "楠梓區",
+    "type": "美式"
+  },
+  {
+    "district": "楠梓區",
+    "type": "義式"
+  },
+  {
+    "district": "楠梓區",
+    "type": "泰式"
+  },
+  {
+    "district": "楠梓區",
+    "type": "甜點"
+  },
+  {
+    "district": "鳳山區",
+    "type": "中式"
+  },
+  {
+    "district": "鳳山區",
+    "type": "日式"
+  },
+  {
+    "district": "鳳山區",
+    "type": "韓式"
+  },
+  {
+    "district": "鳳山區",
+    "type": "美式"
+  },
+  {
+    "district": "鳳山區",
+    "type": "義式"
+  },
+  {
+    "district": "鳳山區",
+    "type": "泰式"
+  },
+  {
+    "district": "鳳山區",
+    "type": "甜點"
+  },
+  {
+    "district": "前鎮區",
+    "type": "中式"
+  },
+  {
+    "district": "前鎮區",
+    "type": "日式"
+  },
+  {
+    "district": "前鎮區",
+    "type": "韓式"
+  },
+  {
+    "district": "前鎮區",
+    "type": "美式"
+  },
+  {
+    "district": "前鎮區",
+    "type": "義式"
+  },
+  {
+    "district": "前鎮區",
+    "type": "泰式"
+  },
+  {
+    "district": "前鎮區",
+    "type": "甜點"
+  },
+  {
+    "district": "小港區",
+    "type": "中式"
+  },
+  {
+    "district": "小港區",
+    "type": "日式"
+  },
+  {
+    "district": "小港區",
+    "type": "韓式"
+  },
+  {
+    "district": "小港區",
+    "type": "美式"
+  },
+  {
+    "district": "小港區",
+    "type": "義式"
+  },
+  {
+    "district": "小港區",
+    "type": "泰式"
+  },
+  {
+    "district": "小港區",
+    "type": "甜點"
+  }
+]

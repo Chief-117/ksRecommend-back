@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ks-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ks-backend
+  template:
+    metadata:
+      labels:
+        app: ks-backend
+    spec:
+      containers:
+      - name: ks-backend
+        image: ks-backend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8000
