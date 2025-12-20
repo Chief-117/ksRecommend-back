@@ -1,0 +1,4 @@
+FROM justb4/jmeter:latest
+
+# 把整個 jmeter 資料夾放進 image
+COPY jmeter /jmeter
