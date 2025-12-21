@@ -206,6 +206,7 @@ EOF
           kubectl delete pod jmeter-test --ignore-not-found=true
 
           echo "=== jmeter finished ==="
+          echo "=== test!!!!!!!! ==="
         '''
       }
     }
