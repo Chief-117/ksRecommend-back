@@ -17,4 +17,4 @@ spec:
         image: noahhh117/ks-backend:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 5000  # 👈 記得與你的 Flask/Gunicorn 監聽埠保持一致
+        - containerPort: 8000  # 👈 記得與你的 Flask/Gunicorn 監聽埠保持一致

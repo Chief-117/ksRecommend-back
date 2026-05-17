@@ -8,4 +8,4 @@ spec:
   ports:
     - protocol: TCP
       port: 80         # 👈 Service 對外的 Port（這樣 Smoke test 只要 curl http://ks-backend-svc 即可）
-      targetPort: 5000 # 👈 對應到上面 Deployment 的 containerPort
+      targetPort: 8000 # 👈 對應到上面 Deployment 的 containerPort

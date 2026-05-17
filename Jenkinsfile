@@ -6,10 +6,10 @@ pipeline {
   }
 
   environment {
-    // 👇 修改為你在 Docker Hub 的後端映像檔完整名稱
+    // 👇 已修改為你在 Docker Hub 的後端映像檔完整名稱
     BACKEND_IMAGE = "noahhh117/ks-backend:latest"
 
-    JMETER_IMAGE_REPO = "t55619/ks-jmeter"
+    JMETER_IMAGE_REPO = "noahhh117/ks-jmeter"
     JMETER_IMAGE_TAG  = "latest"
   }
 
@@ -86,9 +86,11 @@ pipeline {
           kubectl rollout status deployment/ks-backend --timeout=120s
 
           echo "=== 🔍 測試 K8s 內部 Service 通訊 ==="
-          # 如果你的 k8s/service.yaml 開的是 80 port，就用第一個；如果是 5000，就用第二個。
+          # 💡 依據 app.py 與 service.yaml 設定，全面測試連接埠通訊
           if kubectl run curl-test --image=curlimages/curl:8.5.0 --rm -i --restart=Never --timeout=15s -- curl -f "http://ks-backend-svc/api/restaurants?district=%E9%BC%93%E5%B1%B1%E5%8D%80"; then
             echo "=== 🟢 透過 Service 預設 Port (80) 連線成功 ==="
+          elif kubectl run curl-test-8000 --image=curlimages/curl:8.5.0 --rm -i --restart=Never --timeout=15s -- curl -f "http://ks-backend-svc:8000/api/restaurants?district=%E9%BC%93%E5%B1%B1%E5%8D%80"; then
+            echo "=== 🟢 透過 Service 指定 Port (8000) 連線成功 ==="
           elif kubectl run curl-test-5000 --image=curlimages/curl:8.5.0 --rm -i --restart=Never --timeout=15s -- curl -f "http://ks-backend-svc:5000/api/restaurants?district=%E9%BC%93%E5%B1%B1%E5%8D%80"; then
             echo "=== 🟢 透過 Service 指定 Port (5000) 連線成功 ==="
           else
@@ -121,7 +123,9 @@ pipeline {
           export KUBECONFIG=$(find "$(pwd)" -type f -path "*kube-ci/config" | head -n 1)
           FULL_JMETER_IMAGE="${JMETER_IMAGE_REPO}:${JMETER_IMAGE_TAG}"
 
-          kubectl delete pod jmeter-test --ignore-not-found=true
+          # 💡 這裡就是修改的地方：在建立新 Pod 前，使用大絕招強制把舊的壓測 Pod 徹底拔除，不留任何快取殘留！
+          echo "=== 🧹 強制清空 K8s 殘留的壓測 Pod 並等待釋放 ==="
+          kubectl delete pod jmeter-test --grace-period=0 --force --ignore-not-found=true
 
           kubectl apply -f - <<EOF
 apiVersion: v1
