@@ -15,6 +15,6 @@ spec:
       containers:
       - name: ks-backend
         image: ks-backend:latest
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
