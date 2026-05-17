@@ -3,9 +3,9 @@ kind: Service
 metadata:
   name: ks-backend-svc
 spec:
-  type: NodePort
   selector:
     app: ks-backend
   ports:
-  - port: 80
-    targetPort: 8000
+    - protocol: TCP
+      port: 80         # 👈 Service 對外的 Port（這樣 Smoke test 只要 curl http://ks-backend-svc 即可）
+      targetPort: 5000 # 👈 對應到上面 Deployment 的 containerPort
