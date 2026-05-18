@@ -61,12 +61,13 @@ def get_restaurants():
     food_type = request.args.get("type", "").strip()
     price_range = request.args.get("price", "").strip()
 
+    # 🔴 1. 模擬錯誤：如果前端「完全沒傳」或是傳空字串的 district
     if not district:
+        # 回傳 400 Bad Request，讓 pytest 紀錄，同時讓 JMeter 報告抓到這個錯誤類型
         return jsonify({
-            "version": "v2",
-            "count": 0,
-            "data": []
-        })
+            "status": "error",
+            "message": "缺少必要的 district 參數"
+        }), 400
 
     results = []
 
@@ -120,6 +121,15 @@ def get_restaurants():
 
         results.append(r)
 
+    # 🔴 2. 模擬錯誤：如果過濾完發現一筆餐廳都沒有，代表輸入了不存在的行政區
+    if len(results) == 0:
+        # 回傳 404 Not Found
+        return jsonify({
+            "status": "error",
+            "message": f"找不到行政區 '{district}' 的任何餐廳資料"
+        }), 404
+
+    # 🟢 3. 正常找到資料，回傳 200 成功
     response = make_response(jsonify(results))
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
